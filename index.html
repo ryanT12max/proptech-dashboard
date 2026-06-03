@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PropTech Threat Monitor</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f9; padding: 20px; }
+        .threat-card { background: white; padding: 15px; margin-bottom: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .high-threat { border-left: 5px solid red; }
+        .medium-threat { border-left: 5px solid orange; }
+        .low-threat { border-left: 5px solid green; }
+    </style>
+</head>
+<body>
+    <h2>Live Real Estate Threat Monitor</h2>
+
+    <div style="margin-bottom: 20px; padding: 15px; background: #e0e0eb; border-radius: 8px;">
+        <label for="zipInput"><strong>Analyze New Territory:</strong></label>
+        <input type="text" id="zipInput" placeholder="Enter Zip Code (e.g., 77063)" style="padding: 8px; margin-left: 10px;">
+        <button onclick="runPipeline()" style="padding: 8px 15px; background: #0070f3; color: white; border: none; border-radius: 4px; cursor: pointer;">Run AI Analysis</button>
+        <p id="statusMsg" style="color: #0070f3; font-weight: bold; margin-top: 10px;"></p>
+    </div>
+
+    <div id="dashboard">Loading threat intelligence...</div>
+
+    <script>
+        // 1. FUNCTION TO TRIGGER THE VERCEL PYTHON BACKEND
+        function runPipeline() {
+            const zip = document.getElementById('zipInput').value || '77063';
+            const status = document.getElementById('statusMsg');
+            
+            status.innerHTML = "Processing AI Analysis... (This takes about 5-10 seconds)";
+            
+            fetch(`/api/analyze?zipCode=${zip}`)
+                .then(response => {
+                    if (!response.ok) throw new Error("Pipeline failed to execute");
+                    return response.json();
+                })
+                .then(data => {
+                    status.innerHTML = `Analysis Complete for ${data.zip}! Refreshing dashboard...`;
+                    setTimeout(() => location.reload(), 1500); // Reloads the page to show the new data
+                })
+                .catch(error => {
+                    status.innerHTML = `<span style="color: red;">Error: ${error.message}</span>`;
+                });
+        }
+
+        // 2. FUNCTION TO LOAD DATA FROM ORACLE
+        // Strictly use the proxy route to bypass Oracle's browser CORS block
+        const ordsUrl = '/api/oracle';
+
+        fetch(ordsUrl)
+            .then(response => {
+                if (!response.ok) throw new Error("Database fetch failed.");
+                return response.json();
+            })
+            .then(data => {
+                const dashboard = document.getElementById('dashboard');
+                dashboard.innerHTML = ''; 
+                
+                if (!data.items || data.items.length === 0) {
+                    dashboard.innerHTML = '<p>No threats detected yet. Run an analysis above!</p>';
+                    return;
+                }
+
+                data.items.forEach(item => {
+                    // Utilizing the upgraded schema variables
+                    const classification = item.risk_classification || 'Unknown';
+                    
+                    let threatClass = 'low-threat';
+                    if (classification.includes('High')) threatClass = 'high-threat';
+                    if (classification.includes('Medium')) threatClass = 'medium-threat';
+
+                    const card = `
+                        <div class="threat-card ${threatClass}">
+                            <h3>${item.property_address} - $${item.list_price}</h3>
+                            <p><strong>Risk Level:</strong> ${classification} (Score: ${item.threat_score || 'N/A'}/10)</p>
+                            <p><strong>AI Analysis:</strong> ${item.ai_analysis || 'No analysis available'}</p>
+                        </div>
+                    `;
+                    dashboard.innerHTML += card;
+                });
+            })
+            .catch(error => {
+                console.error(error);
+                document.getElementById('dashboard').innerText = 'Error loading intelligence feed. Check console.';
+            });
+    </script>
+</body>
+</html>

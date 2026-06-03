@@ -46,8 +46,7 @@
                 });
         }
 
-        // 2. FUNCTION TO LOAD DATA FROM ORACLE
-        // Strictly use the proxy route to bypass Oracle's browser CORS block
+ // 2. FUNCTION TO LOAD DATA FROM ORACLE
         const ordsUrl = '/api/oracle';
 
         fetch(ordsUrl)
@@ -59,22 +58,24 @@
                 const dashboard = document.getElementById('dashboard');
                 dashboard.innerHTML = ''; 
                 
-                if (!data.items || data.items.length === 0) {
+                // FIXED: Check the direct array 'data', not 'data.items'
+                if (!data || data.length === 0) {
                     dashboard.innerHTML = '<p>No threats detected yet. Run an analysis above!</p>';
                     return;
                 }
 
-                data.items.forEach(item => {
-                    // Utilizing the upgraded schema variables
+                // FIXED: Loop over the direct array
+                data.forEach(item => {
                     const classification = item.risk_classification || 'Unknown';
                     
                     let threatClass = 'low-threat';
                     if (classification.includes('High')) threatClass = 'high-threat';
                     if (classification.includes('Medium')) threatClass = 'medium-threat';
 
+                    // FIXED: Aligned property names (item.address and item.price) to match oracle.py
                     const card = `
                         <div class="threat-card ${threatClass}">
-                            <h3>${item.property_address} - $${item.list_price}</h3>
+                            <h3>${item.address} - $${item.price}</h3>
                             <p><strong>Risk Level:</strong> ${classification} (Score: ${item.threat_score || 'N/A'}/10)</p>
                             <p><strong>AI Analysis:</strong> ${item.ai_analysis || 'No analysis available'}</p>
                         </div>

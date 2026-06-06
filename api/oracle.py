@@ -10,12 +10,14 @@ class handler(BaseHTTPRequestHandler):
             wallet_path = os.path.join(os.path.dirname(__file__), 'wallet')
             
             connection = oracledb.connect(
-                user="ADMIN",
-                password="0n@stR8l1n3U",
-                dsn="AviationDB_high", 
+            connection = oracledb.connect(
+                user=os.environ.get('ORACLE_DB_USER', 'ADMIN'), # Defaults to ADMIN if not found
+                password=os.environ.get('ORACLE_DB_PASSWORD'),
+                dsn=os.environ.get('ORACLE_DSN', 'AviationDB_high'), 
                 config_dir=wallet_path,
                 wallet_location=wallet_path,
-                wallet_password="Tij79268*"
+                wallet_password=os.environ.get('WALLET_PASSWORD')
+    )
             )
             
             cursor = connection.cursor()

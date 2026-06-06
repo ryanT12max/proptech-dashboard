@@ -11,7 +11,7 @@ def get_property_data(zip_code):
     url = f"https://api.rentcast.io/v1/listings/sale?zipCode={zip_code}&limit=5"
     headers = {
         "accept": "application/json",
-        "X-Api-Key": "ee637c3c88634c958d2544aeedae07b3"
+        "X-Api-Key": os.environ.get('RENTCAST_API_KEY')
     }
     resp = requests.get(url, headers=headers)
     return resp.json()

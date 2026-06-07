@@ -2,22 +2,30 @@ from http.server import BaseHTTPRequestHandler
 import json
 import oracledb
 import os
+import base64
 
 class handler(BaseHTTPRequestHandler):
-    def do_GET(self):
+def do_GET(self):
         try:
-            # Securely locate the local wallet folder
-            wallet_path = os.path.join(os.path.dirname(__file__), 'wallet')
+            # 1. Rebuild the wallet inside the cloud's temporary storage
+            wallet_path = '/tmp/wallet'
+            os.makedirs(wallet_path, exist_ok=True)
+            wallet_file = os.path.join(wallet_path, 'cwallet.sso')
             
+            # Only decode and write the file if it hasn't been created in this container yet
+            if not os.path.exists(wallet_file):
+                wallet_data = os.environ.get('WALLET_BASE64')
+                with open(wallet_file, 'wb') as f:
+                    f.write(base64.b64decode(wallet_data))
+            
+            # 2. Connect using the rebuilt file and full DSN string
             connection = oracledb.connect(
-            connection = oracledb.connect(
-                user=os.environ.get('ORACLE_DB_USER', 'ADMIN'), # Defaults to ADMIN if not found
+                user=os.environ.get('ORACLE_DB_USER', 'ADMIN'),
                 password=os.environ.get('ORACLE_DB_PASSWORD'),
-                dsn=os.environ.get('ORACLE_DSN', 'AviationDB_high'), 
+                dsn=os.environ.get('ORACLE_DSN'), 
                 config_dir=wallet_path,
                 wallet_location=wallet_path,
                 wallet_password=os.environ.get('WALLET_PASSWORD')
-    )
             )
             
             cursor = connection.cursor()

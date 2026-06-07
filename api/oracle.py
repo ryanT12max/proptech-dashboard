@@ -5,7 +5,7 @@ import os
 import base64
 
 class handler(BaseHTTPRequestHandler):
-def do_GET(self):
+    def do_GET(self):
         try:
             # 1. Rebuild the wallet inside the cloud's temporary storage
             wallet_path = '/tmp/wallet'

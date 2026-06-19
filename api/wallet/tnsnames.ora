@@ -7,6 +7,3 @@ aviationdb_low = (description= (retry_count=20)(retry_delay=3)(address=(protocol
 aviationdb_tp = (description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.us-chicago-1.oraclecloud.com))(connect_data=(service_name=g9f6559706c9bbf_aviationdb_tp.adb.oraclecloud.com))(security=(ssl_server_dn_match=yes)))
 
 aviationdb_tpurgent = (description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.us-chicago-1.oraclecloud.com))(connect_data=(service_name=g9f6559706c9bbf_aviationdb_tpurgent.adb.oraclecloud.com))(security=(ssl_server_dn_match=yes)))
-
-
-

@@ -14,7 +14,8 @@ class handler(BaseHTTPRequestHandler):
             
             # Only decode and write the file if it hasn't been created in this container yet
             if not os.path.exists(wallet_file):
-                wallet_data = os.environ.get('WALLET_BASE64')
+                # .strip() removes any invisible PowerShell formatting
+                wallet_data = os.environ.get('WALLET_BASE64', '').strip() 
                 with open(wallet_file, 'wb') as f:
                     f.write(base64.b64decode(wallet_data))
             

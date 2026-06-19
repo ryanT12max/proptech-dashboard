@@ -4,6 +4,7 @@ import json
 import requests
 import oracledb
 import os
+import base64
 
 # 1. EXTRACT
 def get_property_data(zip_code):
@@ -44,16 +45,26 @@ def analyze_threat(listing):
 
 # 3. LOAD
 def load_data_to_oracle(listings):
-    # This automatically finds your wallet folder relative to this script
-    wallet_path = os.path.join(os.path.dirname(__file__), 'wallet')
+    # 1. Rebuild the wallet inside the cloud's temporary storage
+    wallet_path = '/tmp/wallet'
+    os.makedirs(wallet_path, exist_ok=True)
+    wallet_file = os.path.join(wallet_path, 'cwallet.sso')
     
+    # Only decode and write the file if it hasn't been created in this container yet
+    if not os.path.exists(wallet_file):
+                # .strip() removes any invisible PowerShell formatting
+                wallet_data = os.environ.get('WALLET_BASE64', '').strip() 
+                with open(wallet_file, 'wb') as f:
+                    f.write(base64.b64decode(wallet_data))
+            
+    # 2. Connect using the rebuilt file and full DSN string
     connection = oracledb.connect(
-        user="ADMIN",
-        password="0n@stR8l1n3U",
-        dsn="AviationDB_high", 
+        user=os.environ.get('ORACLE_DB_USER', 'ADMIN'),
+        password=os.environ.get('ORACLE_DB_PASSWORD'),
+        dsn=os.environ.get('ORACLE_DSN'), 
         config_dir=wallet_path,
         wallet_location=wallet_path,
-        wallet_password="Tij79268*"
+        wallet_password=os.environ.get('WALLET_PASSWORD')
     )
     
     cursor = connection.cursor()

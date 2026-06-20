@@ -28,9 +28,9 @@ This project demonstrates the ability to engineer resilient multi-cloud architec
 5. **Visualize:** Upon successful load, the frontend hits the decoupled `/api/oracle` read-endpoint to fetch the updated database records and dynamically renders the threat intelligence cards.
 
 ## 🔐 Security & Operations Notes
-* **Multi-Cloud Resilience (The Pivot):** Successfully diagnosed a provider-level Cloudflare DNS blackhole on ephemeral Oracle Cloud instances. Engineered a multi-cloud pivot, migrating the compute layer to Vercel and utilizing a local dependency stub to bypass enterprise anti-bot blocks while keeping the pipeline operational.
-* **Stateless Wallet Routing:** Configured a custom `vercel.json` build profile to force the cloud compiler to bundle the Oracle database wallet files into the serverless deployment, ensuring secure database connectivity without exposing keys to the public repository.
-* **Credential Management:** API keys and database passwords are strictly `.gitignore`'d and injected via secure environment variables.
+* **Multi-Cloud Resilience:** Successfully diagnosed a provider-level Cloudflare DNS blackhole on ephemeral Oracle Cloud instances, migrating the compute layer to Vercel and utilizing a local heuristic dependency stub to maintain continuous pipeline execution.
+* **Serverless Network Architecture:** Overcame React frontend memory limits (caused by Base64 encoding massive mTLS wallet files) by engineering a "Walletless Pivot." Transitioned the Oracle connection to 1-Way TLS over Port 1521 and configured a strict Zero-Trust Access Control List (ACL) to securely route dynamic Vercel serverless IPs.
+* **Credential Management:** API keys, database users, and passwords are strictly `.gitignore`'d and securely injected at runtime via Vercel Environment Variables.
 
 ## 🚀 Future Enhancements
 * Reintegrate a live Hugging Face LLM model for the threat analysis, leveraging Vercel's unrestricted outbound network architecture.
